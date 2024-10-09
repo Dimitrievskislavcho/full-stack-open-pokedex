@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  code_linting:
+  code_check:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
@@ -17,3 +17,7 @@ jobs:
         run: npm install
       - name: 'Check code style'
         run: npm run eslint
+      - name: 'Build project'
+        run: npm run build
+      - name: 'Run tests'
+        run: npm run test

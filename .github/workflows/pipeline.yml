@@ -1,5 +1,8 @@
 name: 'Simple deployment pipeline'
 
+env:
+  SKIP_DEPLOYMENT_AND_VERSION_BUMP: ${{ github.event.commits && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
+
 on:
   push:
     branches:
@@ -32,7 +35,7 @@ jobs:
           start: npm run start-prod
           wait-on: http://localhost:5000
       - name: Trigger deployment
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ env.SKIP_DEPLOYMENT_AND_VERSION_BUMP == 'true' }}
         run: curl https://api.render.com/deploy/${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}
   release_tag:
     needs: [code_check]
@@ -42,7 +45,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Bump version and push tag
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ env.SKIP_DEPLOYMENT_AND_VERSION_BUMP == 'true' }}
         uses: anothrNick/github-tag-action@1.71.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

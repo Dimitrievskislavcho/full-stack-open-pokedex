@@ -63,6 +63,7 @@ jobs:
           text: A new version of Pokedex deployed
           description: ''
           details: ${{ format('to {0} by {1}', 'https://dashboard.render.com/', github.actor) }}
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
   error_notify:
     needs: [code_check]
     if: failure()
@@ -75,3 +76,4 @@ jobs:
           text: Build failed
           description: ''
           details: ${{ format('commit {0} by {1} broke the build', github.sha, github.actor) }}
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}

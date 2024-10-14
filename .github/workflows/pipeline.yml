@@ -1,7 +1,7 @@
 name: 'Simple deployment pipeline'
 
 env:
-  SKIP_DEPLOYMENT_AND_VERSION_BUMP: ${{ github.event.commits && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
+  DO_DEPLOYMENT_AND_VERSION_BUMP: ${{ github.event.commits && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
 
 on:
   push:
@@ -35,7 +35,7 @@ jobs:
           start: npm run start-prod
           wait-on: http://localhost:5000
       - name: Trigger deployment
-        if: ${{ env.SKIP_DEPLOYMENT_AND_VERSION_BUMP == 'true' }}
+        if: ${{ env.DO_DEPLOYMENT_AND_VERSION_BUMP == 'true' }}
         run: curl https://api.render.com/deploy/${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}
   release_tag:
     needs: [code_check]
@@ -45,8 +45,33 @@ jobs:
         with:
           fetch-depth: 0
       - name: Bump version and push tag
-        if: ${{ env.SKIP_DEPLOYMENT_AND_VERSION_BUMP == 'true' }}
+        if: ${{ env.DO_DEPLOYMENT_AND_VERSION_BUMP == 'true' }}
         uses: anothrNick/github-tag-action@1.71.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BUMP: patch
+  success_notify:
+    needs: [code_check]
+    if: success()
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Version deployed notify
+        uses: rjstone/discord-webhook-notify@v1
+        if: ${{ env.DO_DEPLOYMENT_AND_VERSION_BUMP == 'true' }}
+        with:
+          severity: info
+          text: A new version of Pokedex deployed
+          description: ''
+          details: ${{ format('to {0} by {1}', 'https://dashboard.render.com/', github.actor) }}
+  error_notify:
+    needs: [code_check]
+    if: failure()
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Version deployed notify
+        uses: rjstone/discord-webhook-notify@v1
+        with:
+          severity: error
+          text: Build failed
+          description: ''
+          details: ${{ format('commit {0} by {1} broke the build', github.sha, github.actor) }}

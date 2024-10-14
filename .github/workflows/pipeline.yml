@@ -56,12 +56,11 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Version deployed notify
-        uses: rjstone/discord-webhook-notify@v1
+        uses: rjstone/discord-webhook-notify@v1.0.0
         if: ${{ env.DO_DEPLOYMENT_AND_VERSION_BUMP == 'true' }}
         with:
           severity: info
           text: A new version of Pokedex deployed
-          description: ''
           details: ${{ format('to {0} by {1}', 'https://dashboard.render.com/', github.actor) }}
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
   error_notify:
@@ -70,10 +69,9 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Version deployed notify
-        uses: rjstone/discord-webhook-notify@v1
+        uses: rjstone/discord-webhook-notify@v1.0.0
         with:
           severity: error
           text: Build failed
-          description: ''
           details: ${{ format('commit {0} by {1} broke the build', github.sha, github.actor) }}
           webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}

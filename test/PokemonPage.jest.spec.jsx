@@ -135,6 +135,6 @@ describe('<PokemonPage />', () => {
     })
 
     expect(screen.queryByText('Previous')).toBeNull()
-    expect(screen.queryByText('Next s')).toBeNull()
+    expect(screen.queryByText('Next')).toBeNull()
   })
 })
